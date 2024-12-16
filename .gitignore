@@ -1,5 +1,5 @@
-node_modules/
-build/
-dist/
-*.log
-*.tmp
+**/node_modules/
+**/build/
+**/dist/
+**/*.log
+**/*.tmp
