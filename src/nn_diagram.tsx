@@ -1,18 +1,57 @@
 import React, { useState, useEffect } from 'react';
 
-const NetworkDiagram = ({ step }) => {
-  const Node = ({ cx, cy, label, type, stepVisible }) => {
-    const getNodeColor = (type, isActive) => {
+interface NetworkDiagramProps {
+  step: number;
+}
+
+interface NodeProps {
+  cx: number;
+  cy: number;
+  label: string;
+  type: string;
+  stepVisible: number;
+}
+
+interface ConnectionProps {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  stepVisible: number;
+  isBackprop?: boolean;
+}
+
+interface ValueProps {
+  x: number;
+  y: number;
+  value: string | number;
+  stepVisible: number;
+  isGradient?: boolean;
+}
+
+interface WeightUpdateProps {
+  x: number;
+  y: number;
+  oldWeight: number;
+  newWeight: number;
+  stepVisible: number;
+}
+
+
+const NetworkDiagram: React.FC<NetworkDiagramProps> = ({ step }) => {
+  const Node: React.FC<NodeProps> = ({ cx, cy, label, type, stepVisible }) => {
+    const getNodeColor = (type: NodeProps['type'], isActive: boolean) => {
       if (!isActive) return "#f0f0f0";
-      const colors = {
+      const colors: { [key in NodeProps['type']]: string } = {
         input: "#333333",
         hidden: "#ffeeba",
         output: "#d5f5e3",
         expected: "#d5f5e3",
         loss: "#f5b7b1"
       };
-      return colors[type] || "#f0f0f0";
+      return colors[type];
     };
+
 
     return (
       <g>
@@ -38,7 +77,7 @@ const NetworkDiagram = ({ step }) => {
     );
   };
 
-  const Connection = ({ x1, y1, x2, y2, stepVisible, isBackprop = false }) => (
+  const Connection: React.FC<ConnectionProps> = ({ x1, y1, x2, y2, stepVisible, isBackprop = false }) => (
     <line
       x1={x1}
       y1={y1}
@@ -50,7 +89,7 @@ const NetworkDiagram = ({ step }) => {
     />
   );
 
-  const Value = ({ x, y, value, stepVisible, isGradient = false }) => (
+  const Value: React.FC<ValueProps> = ({ x, y, value, stepVisible, isGradient = false }) => (
     <g style={{ opacity: step >= stepVisible ? 1 : 0 }}>
       <rect
         x={x - 40}
@@ -74,7 +113,7 @@ const NetworkDiagram = ({ step }) => {
     </g>
   );
 
-  const WeightUpdate = ({ x, y, oldWeight, newWeight, stepVisible }) => (
+  const WeightUpdate: React.FC<WeightUpdateProps> = ({ x, y, oldWeight, newWeight, stepVisible }) => (
     <g style={{ opacity: step >= stepVisible ? 1 : 0 }}>
       <rect
         x={x - 50}
@@ -158,15 +197,19 @@ const NetworkDiagram = ({ step }) => {
       <Value x={300} y={400} value="dL/dw₂₂=-0.176" stepVisible={7} isGradient={true} />
 
       {/* Weight Updates */}
-      <WeightUpdate x={280} y={120} oldWeight="0.5" newWeight="0.512" stepVisible={8} />
-      <WeightUpdate x={280} y={180} oldWeight="0.3" newWeight="0.318" stepVisible={8} />
-      <WeightUpdate x={280} y={320} oldWeight="0.6" newWeight="0.611" stepVisible={8} />
-      <WeightUpdate x={280} y={380} oldWeight="0.4" newWeight="0.418" stepVisible={8} />
+      <WeightUpdate x={280} y={120} oldWeight={0.5} newWeight={0.512} stepVisible={8} />
+      <WeightUpdate x={280} y={180} oldWeight={0.3} newWeight={0.318} stepVisible={8} />
+      <WeightUpdate x={280} y={320} oldWeight={0.6} newWeight={0.611} stepVisible={8} />
+      <WeightUpdate x={280} y={380} oldWeight={0.4} newWeight={0.418} stepVisible={8} />
     </svg>
   );
 };
 
-const ValueTable = ({ currentStep }) => (
+interface ValueTableProps {
+  currentStep: number;
+}
+
+const ValueTable: React.FC<ValueTableProps> = ({ currentStep }) => (
   <div className="p-6 bg-white rounded shadow">
     <table className="min-w-full border-collapse text-left">
       <thead>
@@ -283,8 +326,12 @@ const ValueTable = ({ currentStep }) => (
   </div>
 );
 
-const StepMessage = ({ step }) => {
-  const messages = {
+interface StepMessageProps {
+  step: number;
+}
+
+const StepMessage: React.FC<StepMessageProps> = ({ step }) => {
+  const messages: { [key: number]: string } = {
     0: "Click Play to start the animation",
     1: "Step 1: Input values enter the network",
     2: "Step 2: Values propagate to hidden layer",
@@ -309,7 +356,7 @@ const NeuralNetwork = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    let timer;
+    let timer: NodeJS.Timeout | number;
     if (isPlaying) {
       timer = setInterval(() => {
         setStep((prev) => (prev < 9 ? prev + 1 : 0));
